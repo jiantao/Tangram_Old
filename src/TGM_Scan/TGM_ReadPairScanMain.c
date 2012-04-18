@@ -16,3 +16,17 @@
  * =====================================================================================
  */
 
+#include "TGM_ReadPairScan.h"
+#include "TGM_ReadPairScanGetOpt.h"
+
+int main(int argc, char *argv[])
+{
+    TGM_ReadPairScanPars scanPars;
+    TGM_ReadPairScanSetPars(&scanPars, argc, argv);
+
+    TGM_ReadPairScan(&scanPars);
+
+    TGM_ReadPairScanClean(&scanPars);
+
+    return EXIT_SUCCESS;
+}

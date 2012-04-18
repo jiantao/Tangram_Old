@@ -20,25 +20,7 @@
 #define  TGM_READPAIRSCAN_H
 
 #include "TGM_LibInfo.h"
-
-// parameters used for read pair build
-typedef struct
-{
-    double cutoff;                 // fragment length cutoff p-value
-
-    double trimRate;               // trim rate from fragment length distribution
-
-    unsigned char minMQ;           // minimum mapping quality for a read pair
-
-    FILE* fileListInput;           // input stream of a file list containing all the bam file names
-
-    const char* workingDir;        // working directory for the detector
-
-    const char* specialPrefix;     // prefix of the special reference
-
-    uint32_t prefixLen;            // length of the prefix of the special reference
-
-}TGM_ReadPairScanPars;
+#include "TGM_ReadPairScanGetOpt.h"
 
 void TGM_ReadPairScan(const TGM_ReadPairScanPars* pScanPars);
 
