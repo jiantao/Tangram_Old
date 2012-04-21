@@ -1526,9 +1526,9 @@ void TGM_SpecialIDWrite(const TGM_SpecialID* pSpecialID, FILE* pLibOutput)
     }
 }
 
-void TGM_SpecialIDRead(TGM_SpecialID* pSpecialID, FILE* pLibOutput)
+void TGM_SpecialIDRead(TGM_SpecialID* pSpecialID, FILE* pLibInput)
 {
-    unsigned int readSize = fread(&(pSpecialID->size), sizeof(uint32_t), 1, pLibOutput);
+    unsigned int readSize = fread(&(pSpecialID->size), sizeof(uint32_t), 1, pLibInput);
     if (readSize != 1)
         TGM_ErrQuit("ERROR: Cannot read the number of special reference ID from the library information file.\n");
 
@@ -1548,7 +1548,7 @@ void TGM_SpecialIDRead(TGM_SpecialID* pSpecialID, FILE* pLibOutput)
 
     for (unsigned int i = 0; i != pSpecialID->size; ++i)
     {
-        readSize = fread(pSpecialID->names[i], sizeof(char), 2, pLibOutput);
+        readSize = fread(pSpecialID->names[i], sizeof(char), 2, pLibInput);
         if (readSize != 2)
             TGM_ErrQuit("ERROR: Cannot read the special reference ID into the library information file.\n");
 
@@ -1722,7 +1722,7 @@ void TGM_LibInfoTableMerge(const char* workingDir)
 
         while ((pDirRecord = readdir(pDir)) != NULL)
         {
-            if (strcmp(".", pDirRecord->d_name) != 0 && strcmp("..", pDirRecord->d_name) != 0)
+            if (strcmp(".", pDirRecord->d_name) != 0 && strcmp("..", pDirRecord->d_name) != 0 && strcmp("merged", pDirRecord->d_name))
             {
                 sprintf(libFile, "%s%s/%s", workingDir, pDirRecord->d_name, TGM_LibTableFileName);
                 sprintf(histFile, "%s%s/%s", workingDir, pDirRecord->d_name, TGM_HistFileName);
@@ -1739,14 +1739,12 @@ void TGM_LibInfoTableMerge(const char* workingDir)
 
                 TGM_FragLenHistTransfer(pHistLite, pHistInput, pHistOutput);
 
-                fclose(pLibTableInput);
-                fclose(pHistInput);
-
                 if (count != 0)
                 {
                     TGM_Status mergeStatus = TGM_LibInfoTableDoMerge(pDstLibTable, pSrcLibTable);
                     if (mergeStatus != TGM_OK)
                         TGM_ErrQuit("ERROR: Cannot merge the library table file.\n");
+
 
                     TGM_LibInfoTableFree(pSrcLibTable);
                     pSrcLibTable = NULL;
@@ -1759,6 +1757,9 @@ void TGM_LibInfoTableMerge(const char* workingDir)
                     TGM_SpecialIDRead(pSpecialID, pLibTableInput);
                 }
 
+                fclose(pLibTableInput);
+                fclose(pHistInput);
+
                 ++count;
             }
         }
@@ -1766,7 +1767,7 @@ void TGM_LibInfoTableMerge(const char* workingDir)
         TGM_FragLenHistArrayWriteHeader(pDstLibTable->size, pHistOutput);
 
         sprintf(libFile, "%s%s/%s", workingDir, "merged", TGM_LibTableFileName);
-        FILE* pLibTableOutput = fopen(histFile, "wb");
+        FILE* pLibTableOutput = fopen(libFile, "wb");
         if (pLibTableOutput == NULL)
             TGM_ErrQuit("ERROR: Cannot open the library information table file \"%s\" for writing.\n", libFile);
 
@@ -1779,6 +1780,7 @@ void TGM_LibInfoTableMerge(const char* workingDir)
 
         fclose(pHistOutput);
         fclose(pLibTableOutput);
+        closedir(pDir);
     }
     else
         TGM_ErrQuit("ERROR: Cannot open the working directory \"%s\"\n", workingDir);

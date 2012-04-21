@@ -6,27 +6,23 @@ export ECHO=/bin/echo
 export SRC_DIR := $(shell pwd)
 export OBJ_DIR := $(subst src,obj,$(SRC_DIR))
 export BIN_DIR := $(subst src,bin,$(SRC_DIR))
-export SAMTOOLS_DIR := $(SRC_DIR)/samtools
-export COMMON_DIR := $(SRC_DIR)/TGM_Common
+export COMMON_DIR := $(SRC_DIR)/SR_Common
 export INCLUDES := -I$(COMMON_DIR)
-export LIB := -L$(OBJ_DIR) -lbam -lz -lm
 
 export CC = gcc
 export CFLAGS = -Wall -g -std=gnu99
 
-VPATH := $(SRC_DIR)/TGM_Scan:$(SRC_DIR)/TGM_Common
+VPATH := $(SRC_DIR)/SR_Build:$(SRC_DIR)/SR_Common
 
-SCAN_OBJ := TGM_ReadPairScanMain.o TGM_ReadPairScan.o TGM_ReadPairScanGetOpt.o TGM_Error.o TGM_BamInStream.o TGM_LibInfo.o TGM_Utilities.o TGM_FragLenHist.o \
-	    TGM_BamMemPool.o TGM_BamPairAux.o TGM_BamHeader.o TGM_GetOpt.o
+BUILD_OBJ := SR_Build_Main.o SR_Build_GetOpt.o SR_OutHashTable.o SR_Error.o SR_Reference.o md5.o
+SR_BUILD_OBJ := $(addprefix $(OBJ_DIR)/,$(BUILD_OBJ))
 
-TGM_SCAN_OBJ := $(addprefix $(OBJ_DIR)/,$(SCAN_OBJ))
+DEP = $(BUILD_OBJ:.o=.d)
+SR_BUILD_DEP = $(addprefix $(OBJ_DIR)/,$(DEP))
 
-DEP = $(SCAN_OBJ:.o=.d)
-TGM_SCAN_DEP = $(addprefix $(OBJ_DIR)/,$(DEP))
+SUBDIR = SR_Build SR_Common
 
-SUBDIR = TGM_Scan TGM_Common
-
-all: dep samtools TGM_Scan
+all: dep SR_Build
 
 dep:
 	@for dir in $(SUBDIR); do \
@@ -34,25 +30,19 @@ dep:
 	    echo ""; \
 	done
 
-samtools:
-	make lib -C $(SAMTOOLS_DIR)
-	mv $(SAMTOOLS_DIR)/libbam.a $(OBJ_DIR)/
-
-TGM_Scan: $(SCAN_OBJ)
-	$(CC) $(CFLAGS) $(INCLUDES) -g -o $(BIN_DIR)/TGM_Scan $(TGM_SCAN_OBJ) $(LIB) 
+SR_Build: $(BUILD_OBJ)
+	$(CC) $(CFLAGS) $(INCLUDES) -g -o $(BIN_DIR)/SR_Build $(SR_BUILD_OBJ)
 	@$(ECHO) -e "\n"
 
 
--include $(TGM_SCAN_DEP)
+-include $(SR_BUILD_DEP)
 
 
-.PHONY: TGM_Scan
+.PHONY: SR_Build
 .PHONY: all
 .PHONY: dep
 .PHONY: clean
-.PHONY: samtools
 
 clean:
 	-rm -f $(OBJ_DIR)/* $(BIN_DIR)/*
-	make clean -C $(SAMTOOLS_DIR)
 

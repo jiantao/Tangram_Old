@@ -154,6 +154,9 @@ TGM_FragLenHistLite* TGM_FragLenHistLiteAlloc(unsigned int capacity)
     pHistLite->size = 0;
     pHistLite->capacity = 0;
 
+    pHistLite->fragLen = NULL;
+    pHistLite->freq = NULL;
+
     TGM_FragLenHistLiteInit(pHistLite, (capacity + 1) / 2);
 
     return pHistLite;
@@ -333,7 +336,7 @@ void TGM_FragLenHistLiteRead(TGM_FragLenHistLite* pHistLite, FILE* input)
 
     readSize = fread(pHistLite->freq, sizeof(uint32_t), pHistLite->size, input);
     if (readSize != pHistLite->size)
-        TGM_ErrQuit("ERROR: Cannot read the fragment length array from the file.\n");
+        TGM_ErrQuit("ERROR: Cannot read the frequency array from the file.\n");
 }
 
 void TGM_FragLenHistLiteWrite(const TGM_FragLenHistLite* pHistLite, FILE* output)

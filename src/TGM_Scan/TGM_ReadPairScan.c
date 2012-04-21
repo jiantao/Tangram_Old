@@ -42,6 +42,8 @@ void TGM_ReadPairScan(const TGM_ReadPairScanPars* pScanPars)
     TGM_LibInfoTableSetCutoff(pLibTable, pScanPars->cutoff);
     TGM_LibInfoTableSetTrimRate(pLibTable, pScanPars->trimRate);
 
+    TGM_CheckWorkingDir(pScanPars->workingDir);
+
     // get the library table output file name
     char* libTableOutputFile = TGM_CreateFileName(pScanPars->workingDir, TGM_LibTableFileName);
 
